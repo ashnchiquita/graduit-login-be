@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { CreateAkunDto } from "src/dto/akun.dto";
 import { Pengguna } from "src/entities/pengguna.entity";
 import { Repository } from "typeorm";
 
@@ -17,5 +18,28 @@ export class AkunService {
       .skip((page - 1) * limit)
       .take(limit)
       .getMany();
+  }
+
+  async findById(accountId: string) {
+    return await this.penggunaRepository.findOneBy({ id: accountId });
+  }
+
+  async createOrUpdateAccount(createAkunDto: CreateAkunDto) {
+    return await this.penggunaRepository.upsert(
+      {
+        id: createAkunDto.id,
+        nama: createAkunDto.nama,
+        email: createAkunDto.email,
+        status: createAkunDto.status,
+        roles: createAkunDto.access,
+      },
+      ["id"],
+    );
+
+    // return await this.penggunaRepository.save(newUser);
+  }
+
+  async deleteAccount(accountId: string) {
+    return await this.penggunaRepository.delete(accountId);
   }
 }
