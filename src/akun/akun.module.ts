@@ -6,6 +6,7 @@ import { Pengguna } from "src/entities/pengguna.entity";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Pengguna])],
+  exports: [AkunService],
   controllers: [AkunController],
   providers: [AkunService],
 })
