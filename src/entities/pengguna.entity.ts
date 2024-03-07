@@ -1,8 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Pengguna {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column()
@@ -14,6 +14,6 @@ export class Pengguna {
   @Column()
   status: string;
 
-  @Column('simple-array')
+  @Column("simple-array")
   roles: string[];
 }

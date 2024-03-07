@@ -1,15 +1,16 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Pengguna } from './entities/pengguna.entity';
+import { Module } from "@nestjs/common";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import { ConfigModule } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { Pengguna } from "./entities/pengguna.entity";
+import { AkunModule } from "./akun/akun.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
-      type: 'postgres',
+      type: "postgres",
       host: process.env.POSTGRES_HOST,
       port: +process.env.POSTGRES_PORT || 5432,
       username: process.env.POSTGRES_USER,
@@ -18,6 +19,7 @@ import { Pengguna } from './entities/pengguna.entity';
       entities: [Pengguna],
       synchronize: false,
     }),
+    AkunModule,
   ],
   controllers: [AppController],
   providers: [AppService],
