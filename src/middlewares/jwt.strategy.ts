@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
+import { AuthDto } from "src/dto/auth.dto";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -16,14 +17,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   private static extractJwtFromCookie(req: Request) {
-    if (req?.cookies?.access_token) {
-      return req.cookies.access_token;
+    if (req?.cookies?.["gradu-it.access-token"]) {
+      return req.cookies["gradu-it.access-token"];
     }
 
     return null;
   }
 
-  async validate(payload: any) {
+  validate(payload: any): AuthDto {
     return { id: payload.sub };
   }
 }

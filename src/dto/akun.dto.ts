@@ -7,10 +7,3 @@ export class CreateAkunDto {
   password?: string;
   roles: RoleEnum[];
 }
-
-export class GetAkunDto {
-  id: string;
-  nama: string;
-  email: string;
-  roles: RoleEnum[];
-}

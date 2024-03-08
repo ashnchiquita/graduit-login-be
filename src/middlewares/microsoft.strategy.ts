@@ -2,6 +2,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from "passport-microsoft";
 import { Injectable } from "@nestjs/common";
 import { AkunService } from "../akun/akun.service";
+import { AuthDto } from "src/dto/auth.dto";
 
 @Injectable()
 export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
@@ -35,6 +36,8 @@ export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
       user.name,
     );
 
-    done(null, user);
+    const dto: AuthDto = { id: user.id };
+
+    done(null, dto);
   }
 }

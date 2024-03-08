@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
 import { Request, Response } from "express";
 import { AuthService } from "./auth.service";
-import { GetAkunDto } from "src/dto/akun.dto";
 import { LocalAuthGuard } from "src/middlewares/local-auth.guard";
 import { JwtAuthGuard } from "src/middlewares/jwt-auth.guard";
 import { AkunService } from "../akun/akun.service";
 import { MicrosoftAuthGuard } from "src/middlewares/microsoft-auth.guard";
+import { AuthDto } from "src/dto/auth.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -17,12 +17,10 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post("/login/credentials")
   async loginWithCredentials(@Req() req: Request, @Res() res: Response) {
-    const { accessToken } = await this.authService.login(
-      req.user as GetAkunDto,
-    );
+    const { accessToken } = await this.authService.login(req.user as AuthDto);
 
     res
-      .cookie("access_token", accessToken, {
+      .cookie("gradu-it.access-token", accessToken, {
         httpOnly: true,
         secure: false,
         sameSite: "lax",
@@ -45,12 +43,10 @@ export class AuthController {
       return "No user from microsoft";
     }
 
-    const { accessToken } = await this.authService.login(
-      req.user as GetAkunDto,
-    );
+    const { accessToken } = await this.authService.login(req.user as AuthDto);
 
     res
-      .cookie("access_token", accessToken, {
+      .cookie("gradu-it.access-token", accessToken, {
         httpOnly: true,
         secure: false,
         sameSite: "lax",
@@ -69,6 +65,6 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post("logout")
   logout(@Res() res: Response) {
-    res.clearCookie("access_token").send({ status: "ok" });
+    res.clearCookie("gradu-it.access-token").send({ status: "ok" });
   }
 }

@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { AkunService } from "src/akun/akun.service";
 import * as bcrypt from "bcrypt";
-import { GetAkunDto } from "src/dto/akun.dto";
 import { JwtService } from "@nestjs/jwt";
+import { AuthDto } from "src/dto/auth.dto";
 
 @Injectable()
 export class AuthService {
@@ -11,10 +11,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(
-    email: string,
-    password: string,
-  ): Promise<GetAkunDto | null> {
+  async validateUser(email: string, password: string): Promise<AuthDto | null> {
     const user = await this.akunService.findByEmail(email);
 
     if (user) {
@@ -23,9 +20,6 @@ export class AuthService {
       if (match) {
         return {
           id: user.id,
-          nama: user.nama,
-          email: user.email,
-          roles: user.roles,
         };
       }
     }
@@ -33,7 +27,7 @@ export class AuthService {
     return null;
   }
 
-  async login(user: GetAkunDto) {
+  async login(user: AuthDto) {
     const payload = { sub: user.id };
     return {
       accessToken: this.jwtService.sign(payload),
