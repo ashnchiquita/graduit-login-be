@@ -9,16 +9,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        JwtStrategy.extractJwtFromCookie,
+        JwtStrategy.extractJwtFromReq,
       ]),
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET,
     });
   }
 
-  private static extractJwtFromCookie(req: Request) {
+  private static extractJwtFromReq(req: Request) {
     if (req?.cookies?.["gradu-it.access-token"]) {
       return req.cookies["gradu-it.access-token"];
+    }
+
+    if (req.headers?.authorization) {
+      return req.headers.authorization.slice(7);
     }
 
     return null;

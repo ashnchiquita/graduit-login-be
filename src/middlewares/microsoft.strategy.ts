@@ -11,7 +11,7 @@ export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
       clientID: process.env.AAD_CLIENT_ID,
       clientSecret: process.env.AAD_CLIENT_SECRET,
       tenant: process.env.AAD_TENANT,
-      callbackURL: "http://localhost:3000/auth/microsoft-redirect",
+      callbackURL: `${process.env.AUTH_SERVICE_URL}/auth/microsoft-redirect`,
       scope: ["user.read"],
     });
   }

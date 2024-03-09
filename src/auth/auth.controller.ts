@@ -6,9 +6,6 @@ import { JwtAuthGuard } from "src/middlewares/jwt-auth.guard";
 import { AkunService } from "../akun/akun.service";
 import { MicrosoftAuthGuard } from "src/middlewares/microsoft-auth.guard";
 import { AuthDto } from "src/dto/auth.dto";
-import { RolesGuard } from "src/middlewares/roles.guard";
-import { Roles } from "src/middlewares/roles.decorator";
-import { RoleEnum } from "src/entities/pengguna.entity";
 
 @Controller("auth")
 export class AuthController {
@@ -69,13 +66,5 @@ export class AuthController {
   @Post("logout")
   logout(@Res() res: Response) {
     res.clearCookie("gradu-it.access-token").send({ status: "ok" });
-  }
-
-  // TODO: delete (for example only)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN)
-  @Get("/admin")
-  adminOnly() {
-    return "hi >:3";
   }
 }
