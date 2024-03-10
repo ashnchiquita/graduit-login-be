@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
-import { Request, Response } from "express";
+import { CookieOptions, Request, Response } from "express";
 import { AuthService } from "./auth.service";
 import { LocalAuthGuard } from "src/middlewares/local-auth.guard";
 import { JwtAuthGuard } from "src/middlewares/jwt-auth.guard";
@@ -14,17 +14,20 @@ export class AuthController {
     private akunService: AkunService,
   ) {}
 
+  private static cookieOptions: CookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+  };
+
   @UseGuards(LocalAuthGuard)
   @Post("/login/credentials")
   async loginWithCredentials(@Req() req: Request, @Res() res: Response) {
     const { accessToken } = await this.authService.login(req.user as AuthDto);
 
-    // TODO: remove third-party cookies
     res
       .cookie("gradu-it.access-token", accessToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
+        ...AuthController.cookieOptions,
         expires: new Date(Date.now() + 1 * 24 * 60 * 1000),
       })
       .send({ status: "ok" });
@@ -46,12 +49,9 @@ export class AuthController {
 
     const { accessToken } = await this.authService.login(req.user as AuthDto);
 
-    // TODO: remove third-party cookies
     res
       .cookie("gradu-it.access-token", accessToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
+        ...AuthController.cookieOptions,
         expires: new Date(Date.now() + 1 * 24 * 60 * 1000),
       })
       .redirect(`${process.env.LOGIN_FE_URL}`);
