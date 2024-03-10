@@ -2,7 +2,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from "passport-microsoft";
 import { Injectable } from "@nestjs/common";
 import { AkunService } from "../akun/akun.service";
-import { AuthDto } from "src/dto/auth.dto";
+import { AuthDto } from "src/auth/auth.dto";
 
 @Injectable()
 export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
