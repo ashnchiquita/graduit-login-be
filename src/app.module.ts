@@ -5,6 +5,7 @@ import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Pengguna } from "./entities/pengguna.entity";
 import { AkunModule } from "./akun/akun.module";
+import { AuthModule } from "./auth/auth.module";
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AkunModule } from "./akun/akun.module";
       synchronize: false,
     }),
     AkunModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
