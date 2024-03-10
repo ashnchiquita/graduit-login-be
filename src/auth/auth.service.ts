@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { AkunService } from "src/akun/akun.service";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
-import { AuthDto } from "src/dto/auth.dto";
+import { AuthDto } from "./auth.dto";
 
 @Injectable()
 export class AuthService {
