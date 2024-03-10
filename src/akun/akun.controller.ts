@@ -8,7 +8,7 @@ import {
   Query,
 } from "@nestjs/common";
 import { AkunService } from "./akun.service";
-import { CreateAkunDto } from "src/dto/akun.dto";
+import { CreateAkunDto } from "src/akun/akun.dto";
 
 @Controller("akun")
 export class AkunController {
