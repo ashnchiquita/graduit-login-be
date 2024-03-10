@@ -19,11 +19,12 @@ export class AuthController {
   async loginWithCredentials(@Req() req: Request, @Res() res: Response) {
     const { accessToken } = await this.authService.login(req.user as AuthDto);
 
+    // TODO: remove third-party cookies
     res
       .cookie("gradu-it.access-token", accessToken, {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax",
+        secure: true,
+        sameSite: "none",
         expires: new Date(Date.now() + 1 * 24 * 60 * 1000),
       })
       .send({ status: "ok" });
@@ -45,14 +46,15 @@ export class AuthController {
 
     const { accessToken } = await this.authService.login(req.user as AuthDto);
 
+    // TODO: remove third-party cookies
     res
       .cookie("gradu-it.access-token", accessToken, {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax",
+        secure: true,
+        sameSite: "none",
         expires: new Date(Date.now() + 1 * 24 * 60 * 1000),
       })
-      .redirect("/auth/self"); // TODO: Redirect to the frontend
+      .redirect(`${process.env.LOGIN_FE_URL}`);
   }
 
   @UseGuards(JwtAuthGuard)

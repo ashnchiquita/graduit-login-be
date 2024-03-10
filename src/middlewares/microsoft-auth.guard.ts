@@ -4,6 +4,8 @@ import { AuthGuard } from "@nestjs/passport";
 @Injectable()
 export class MicrosoftAuthGuard extends AuthGuard("microsoft") {
   constructor() {
-    super();
+    super({
+      prompt: "select_account",
+    });
   }
 }
