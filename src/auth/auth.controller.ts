@@ -5,7 +5,7 @@ import { LocalAuthGuard } from "src/middlewares/local-auth.guard";
 import { JwtAuthGuard } from "src/middlewares/jwt-auth.guard";
 import { AkunService } from "../akun/akun.service";
 import { MicrosoftAuthGuard } from "src/middlewares/microsoft-auth.guard";
-import { AuthDto } from "src/dto/auth.dto";
+import { AuthDto } from "src/auth/auth.dto";
 
 @Controller("auth")
 export class AuthController {
