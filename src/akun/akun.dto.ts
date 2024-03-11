@@ -5,5 +5,5 @@ export class CreateAkunDto {
   nama: string;
   email: string;
   password?: string;
-  roles: RoleEnum[];
+  access: RoleEnum[];
 }
