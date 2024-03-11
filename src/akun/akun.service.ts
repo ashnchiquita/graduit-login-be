@@ -58,7 +58,7 @@ export class AkunService {
         nama: createAkunDto.nama,
         email: createAkunDto.email,
         password: hash,
-        roles: createAkunDto.roles,
+        roles: createAkunDto.access,
       },
       ["id"],
     );
