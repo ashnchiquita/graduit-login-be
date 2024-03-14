@@ -6,4 +6,12 @@ export class CreateAkunDto {
   email: string;
   password?: string;
   access: RoleEnum[];
+  nim?: string;
+}
+
+export class UpsertExtDto {
+  id: string;
+  email: string;
+  nama: string;
+  nim: string | null;
 }
