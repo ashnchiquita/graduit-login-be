@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CreateAkunDto } from "src/akun/akun.dto";
+import { CreateAkunDto, UpsertExtDto } from "src/akun/akun.dto";
 import { Pengguna } from "src/entities/pengguna.entity";
 import { Repository } from "typeorm";
 import * as bcrypt from "bcrypt";
@@ -20,6 +20,7 @@ export class AkunService {
         "pengguna.nama",
         "pengguna.email",
         "pengguna.roles",
+        "pengguna.nim",
       ])
       .where("pengguna.nama ILIKE :search", { search: `%${search}%` })
       .skip((page - 1) * limit)
@@ -34,6 +35,7 @@ export class AkunService {
         nama: true,
         email: true,
         roles: true,
+        nim: true,
       },
       where: {
         id: accountId,
@@ -59,6 +61,7 @@ export class AkunService {
         email: createAkunDto.email,
         password: hash,
         roles: createAkunDto.access,
+        nim: createAkunDto.nim,
       },
       ["id"],
     );
@@ -68,18 +71,19 @@ export class AkunService {
     return await this.penggunaRepository.delete(accountId);
   }
 
-  async upsertExternalAccount(id: string, email: string, nama: string) {
+  async upsertExternalAccount(upsertExtDto: UpsertExtDto) {
     return await this.penggunaRepository
       .createQueryBuilder()
       .insert()
       .into(Pengguna)
       .values({
-        id,
-        email,
-        nama,
+        id: upsertExtDto.id,
+        email: upsertExtDto.email,
+        nama: upsertExtDto.nama,
         roles: [],
+        nim: upsertExtDto.nim,
       })
-      .orUpdate(["email", "nama"], ["id"])
+      .orUpdate(["email", "nama", "nim"], ["id"])
       .execute();
   }
 }

@@ -27,14 +27,20 @@ export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
     const user = {
       id: id as string,
       email: emails[0].value as string,
-      name: displayName as string,
+      nama: displayName as string,
     };
 
-    await this.akunService.upsertExternalAccount(
-      user.id,
-      user.email,
-      user.name,
-    );
+    const spilltedEmail = user.email.split("@")[0];
+    let nim: null | string = null;
+
+    if (spilltedEmail.match(/^\d{8}$/)) {
+      nim = spilltedEmail;
+    }
+
+    await this.akunService.upsertExternalAccount({
+      ...user,
+      nim,
+    });
 
     const dto: AuthDto = { id: user.id };
 
