@@ -30,11 +30,11 @@ export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
       nama: displayName as string,
     };
 
-    const spilltedEmail = user.email.split("@")[0];
+    const splittedEmail = user.email.split("@")[0];
     let nim: null | string = null;
 
-    if (spilltedEmail.match(/^\d{8}$/)) {
-      nim = spilltedEmail;
+    if (splittedEmail.match(/^\d{8}$/)) {
+      nim = splittedEmail;
     }
 
     await this.akunService.upsertExternalAccount({
