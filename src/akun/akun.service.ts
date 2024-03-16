@@ -1,51 +1,55 @@
 import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
 import { CreateAkunDto, UpsertExtDto } from "src/akun/akun.dto";
 import { Pengguna } from "src/entities/pengguna.entity";
-import { Repository } from "typeorm";
 import * as bcrypt from "bcrypt";
+import { TransactionService } from "src/transaction/transaction.service";
+import { v4 as uuidv4 } from "uuid";
 
 @Injectable()
 export class AkunService {
-  constructor(
-    @InjectRepository(Pengguna)
-    private penggunaRepository: Repository<Pengguna>,
-  ) {}
+  constructor(private transactionService: TransactionService) {}
 
   async findAll(page: number, limit: number, search: string) {
-    return await this.penggunaRepository
-      .createQueryBuilder("pengguna")
-      .select([
-        "pengguna.id",
-        "pengguna.nama",
-        "pengguna.email",
-        "pengguna.roles",
-        "pengguna.nim",
-      ])
-      .where("pengguna.nama ILIKE :search", { search: `%${search}%` })
-      .skip((page - 1) * limit)
-      .take(limit)
-      .getMany();
+    return await this.transactionService.transaction(async (qr1, qr2) => {
+      return await qr2.manager
+        .getRepository(Pengguna)
+        .createQueryBuilder("pengguna")
+        .select([
+          "pengguna.id",
+          "pengguna.nama",
+          "pengguna.email",
+          "pengguna.roles",
+          "pengguna.nim",
+        ])
+        .where("pengguna.nama ILIKE :search", { search: `%${search}%` })
+        .skip((page - 1) * limit)
+        .take(limit)
+        .getMany();
+    });
   }
 
   async findById(accountId: string) {
-    return await this.penggunaRepository.findOne({
-      select: {
-        id: true,
-        nama: true,
-        email: true,
-        roles: true,
-        nim: true,
-      },
-      where: {
-        id: accountId,
-      },
+    return await this.transactionService.transaction(async (qr1, qr2) => {
+      return await qr2.manager.getRepository(Pengguna).findOne({
+        select: {
+          id: true,
+          nama: true,
+          email: true,
+          roles: true,
+          nim: true,
+        },
+        where: {
+          id: accountId,
+        },
+      });
     });
   }
 
   async findByEmail(email: string) {
-    return await this.penggunaRepository.findOneBy({
-      email,
+    return await this.transactionService.transaction(async (qr1, qr2) => {
+      return await qr2.manager.getRepository(Pengguna).findOneBy({
+        email,
+      });
     });
   }
 
@@ -54,36 +58,64 @@ export class AkunService {
       ? await bcrypt.hash(createAkunDto.password, 10)
       : undefined;
 
-    return await this.penggunaRepository.upsert(
-      {
-        id: createAkunDto.id,
-        nama: createAkunDto.nama,
-        email: createAkunDto.email,
-        password: hash,
-        roles: createAkunDto.access,
-        nim: createAkunDto.nim,
-      },
-      ["id"],
-    );
+    if (!createAkunDto.id) {
+      createAkunDto.id = uuidv4();
+    }
+
+    const val = {
+      ...createAkunDto,
+      password: hash,
+      roles: createAkunDto.access,
+    };
+
+    return await this.transactionService.transaction(async (qr1, qr2) => {
+      const [res1] = await Promise.all([
+        qr1.manager.getRepository(Pengguna).upsert(val, ["id"]),
+        qr2.manager.getRepository(Pengguna).upsert(val, ["id"]),
+      ]);
+
+      return res1;
+    });
   }
 
   async deleteAccount(accountId: string) {
-    return await this.penggunaRepository.delete(accountId);
+    return await this.transactionService.transaction(async (qr1, qr2) => {
+      const [res1] = await Promise.all([
+        qr1.manager.getRepository(Pengguna).delete(accountId),
+        qr2.manager.getRepository(Pengguna).delete(accountId),
+      ]);
+
+      return res1;
+    });
   }
 
   async upsertExternalAccount(upsertExtDto: UpsertExtDto) {
-    return await this.penggunaRepository
-      .createQueryBuilder()
-      .insert()
-      .into(Pengguna)
-      .values({
-        id: upsertExtDto.id,
-        email: upsertExtDto.email,
-        nama: upsertExtDto.nama,
+    return await this.transactionService.transaction(async (qr1, qr2) => {
+      const val = {
+        ...upsertExtDto,
         roles: [],
-        nim: upsertExtDto.nim,
-      })
-      .orUpdate(["email", "nama", "nim"], ["id"])
-      .execute();
+      };
+
+      const [res1] = await Promise.all([
+        qr1.manager
+          .getRepository(Pengguna)
+          .createQueryBuilder()
+          .insert()
+          .into(Pengguna)
+          .values(val)
+          .orUpdate(["email", "nama", "nim"], ["id"])
+          .execute(),
+        qr2.manager
+          .getRepository(Pengguna)
+          .createQueryBuilder()
+          .insert()
+          .into(Pengguna)
+          .values(val)
+          .orUpdate(["email", "nama", "nim"], ["id"])
+          .execute(),
+      ]);
+
+      return res1;
+    });
   }
 }

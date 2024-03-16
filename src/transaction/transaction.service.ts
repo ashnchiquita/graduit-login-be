@@ -49,6 +49,7 @@ export class TransactionService {
       for (const qr of queryRunners) {
         await qr.rollbackTransaction();
       }
+
       throw error;
     } finally {
       for (const qr of queryRunners) {
