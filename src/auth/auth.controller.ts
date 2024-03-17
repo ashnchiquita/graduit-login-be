@@ -60,7 +60,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get("self")
   getSelf(@Req() req: Request) {
-    const { id } = req.user as { id: string };
+    const { id } = req.user as AuthDto;
     return this.akunService.findById(id);
   }
 
