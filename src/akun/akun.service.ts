@@ -1,5 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { CreateAkunDto, UpsertExtDto } from "src/akun/akun.dto";
+import {
+  BatchUpdateRoleDto,
+  CreateAkunDto,
+  FindAllResDto,
+  UpsertExtDto,
+} from "src/akun/akun.dto";
 import { Pengguna } from "src/entities/pengguna.entity";
 import * as bcrypt from "bcrypt";
 import { TransactionService } from "src/transaction/transaction.service";
@@ -9,23 +14,34 @@ import { v4 as uuidv4 } from "uuid";
 export class AkunService {
   constructor(private transactionService: TransactionService) {}
 
-  async findAll(page: number, limit: number, search: string) {
-    return await this.transactionService.transaction(async (qr1, qr2) => {
-      return await qr2.manager
-        .getRepository(Pengguna)
-        .createQueryBuilder("pengguna")
-        .select([
-          "pengguna.id",
-          "pengguna.nama",
-          "pengguna.email",
-          "pengguna.roles",
-          "pengguna.nim",
-        ])
-        .where("pengguna.nama ILIKE :search", { search: `%${search}%` })
-        .skip((page - 1) * limit)
-        .take(limit)
-        .getMany();
-    });
+  async findAll(
+    page: number,
+    limit: number,
+    search: string,
+  ): Promise<FindAllResDto> {
+    const [akun, count] = await this.transactionService.transaction(
+      async (qr1, qr2) => {
+        return await qr2.manager
+          .getRepository(Pengguna)
+          .createQueryBuilder("pengguna")
+          .select([
+            "pengguna.id",
+            "pengguna.nama",
+            "pengguna.email",
+            "pengguna.roles",
+            "pengguna.nim",
+          ])
+          .where("pengguna.nama ILIKE :search", { search: `%${search}%` })
+          .skip((page - 1) * limit)
+          .take(limit)
+          .getManyAndCount();
+      },
+    );
+
+    return {
+      akun,
+      count,
+    };
   }
 
   async findById(accountId: string) {
@@ -117,5 +133,23 @@ export class AkunService {
 
       return res1;
     });
+  }
+
+  async batchUpdateRole({ ids, newRoles }: BatchUpdateRoleDto): Promise<{
+    message: string;
+  }> {
+    await this.transactionService.transaction(async (qr1, qr2) => {
+      const s1Repo = qr1.manager.getRepository(Pengguna);
+      const s2Repo = qr2.manager.getRepository(Pengguna);
+
+      for (const id of ids) {
+        await Promise.all([
+          s1Repo.update({ id }, { roles: newRoles }),
+          s2Repo.update({ id }, { roles: newRoles }),
+        ]);
+      }
+    });
+
+    return { message: "success" };
   }
 }
