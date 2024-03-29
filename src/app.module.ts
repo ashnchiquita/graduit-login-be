@@ -24,6 +24,7 @@ const defaultOptions: TypeOrmModuleOptions = {
       username: process.env.S1_POSTGRES_USER,
       password: process.env.S1_POSTGRES_PASSWORD,
       database: process.env.S1_POSTGRES_DATABASE,
+      // synchronize: true,
       name: "S1Connection",
     }),
     TypeOrmModule.forRoot({
@@ -33,6 +34,7 @@ const defaultOptions: TypeOrmModuleOptions = {
       username: process.env.S2_POSTGRES_USER,
       password: process.env.S2_POSTGRES_PASSWORD,
       database: process.env.S2_POSTGRES_DATABASE,
+      // synchronize: true,
       name: "S2Connection",
     }),
     AkunModule,
