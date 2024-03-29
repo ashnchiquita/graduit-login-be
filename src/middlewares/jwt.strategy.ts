@@ -17,8 +17,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   private static extractJwtFromReq(req: Request) {
-    if (req?.cookies?.["gradu-it.access-token"]) {
-      return req.cookies["gradu-it.access-token"];
+    if (req?.cookies?.[process.env.COOKIE_NAME]) {
+      return req.cookies[process.env.COOKIE_NAME];
     }
 
     if (req.headers?.authorization) {

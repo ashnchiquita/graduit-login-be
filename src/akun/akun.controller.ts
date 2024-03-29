@@ -26,6 +26,8 @@ import { ApiTags } from "@nestjs/swagger";
 export class AkunController {
   constructor(private akunService: AkunService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN, RoleEnum.S2_TIM_TESIS)
   @Get("/")
   findAll(
     @Query("page") page: number = 1,

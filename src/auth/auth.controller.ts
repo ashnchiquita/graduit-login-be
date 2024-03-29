@@ -43,7 +43,7 @@ export class AuthController {
     const { accessToken } = await this.authService.login(req.user as AuthDto);
 
     res
-      .cookie("gradu-it.access-token", accessToken, {
+      .cookie(process.env.COOKIE_NAME, accessToken, {
         ...AuthController.cookieOptions,
         expires: new Date(Date.now() + 1 * 24 * 60 * 1000),
       })
@@ -72,7 +72,7 @@ export class AuthController {
     const { accessToken } = await this.authService.login(req.user as AuthDto);
 
     res
-      .cookie("gradu-it.access-token", accessToken, {
+      .cookie(process.env.COOKIE_NAME, accessToken, {
         ...AuthController.cookieOptions,
         expires: new Date(Date.now() + 1 * 24 * 60 * 1000),
       })
@@ -101,6 +101,6 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post("logout")
   logout(@Res() res: Response) {
-    res.clearCookie("gradu-it.access-token").send({ status: "ok" });
+    res.clearCookie(process.env.COOKIE_NAME).send({ status: "ok" });
   }
 }

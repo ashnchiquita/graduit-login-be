@@ -3,11 +3,13 @@ import { AppModule } from "./app.module";
 import * as cookieParser from "cookie-parser";
 import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { ForbiddenExceptionFilter } from "./middlewares/forbidden-exception.filter";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalFilters(new ForbiddenExceptionFilter());
 
   app.use(cookieParser());
   app.enableCors({
@@ -24,7 +26,7 @@ async function bootstrap() {
     .addTag("auth")
     .addTag("akun")
     .addBearerAuth()
-    .addCookieAuth("gradu-it.access-token")
+    .addCookieAuth(process.env.COOKIE_NAME)
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup("api-docs", app, document);
