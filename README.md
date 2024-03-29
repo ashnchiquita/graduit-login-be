@@ -52,23 +52,23 @@ Folder menggunakan sistem modul NestJS yang bisa dilihat di https://docs.nestjs.
 Berikut merupakan penjelasan dasar dari setiap folder.
 
 - `src/entities`
-   a. Berisi entity typeORM sesuai ERD yang ada di https://app.eraser.io/workspace/z0dwTFLk5F4reT6CYK7E.
-   b. Atribut entity (ex: title, description) bebas ditambahkan. Jika ada atribut yang diubah
+  a. Berisi entity typeORM sesuai ERD yang ada di https://app.eraser.io/workspace/z0dwTFLk5F4reT6CYK7E.
+  b. Atribut entity (ex: title, description) bebas ditambahkan. Jika ada atribut yang diubah
   atau dihapus, infokan ke yang lain karena mungkin berpengaruh ke pengerjaan sebelumnya.
-   c. Jika ingin menambahkan tabel atau relasi, diskusikan dengan yang lain.
-   d. Jika mengubah atribut atau tabel, update ERD agar sesuai.
+  c. Jika ingin menambahkan tabel atau relasi, diskusikan dengan yang lain.
+  d. Jika mengubah atribut atau tabel, update ERD agar sesuai.
 - `src/helper`
-   a. Berisi fungsi utility atau helper.
+  a. Berisi fungsi utility atau helper.
 - `src/middlewares`
-   a. Berisi midddleware aplikasi, bisa berupa guard atau interceptor.
+  a. Berisi midddleware aplikasi, bisa berupa guard atau interceptor.
 - `src/<nama-modul>/.module.ts`
-   a. Berisi konfigurasi dasar dari sebuah modul.
+  a. Berisi konfigurasi dasar dari sebuah modul.
 - `src/<nama-modul>/.controller.ts`
-   a. Berisi controller yang akan melakukan mapping antara endpoint dengan handler-nya.
+  a. Berisi controller yang akan melakukan mapping antara endpoint dengan handler-nya.
 - `src/<nama-modul>/.service.ts`
-   a. Berisi service yang akan menerima request dan menghasilkan response.
+  a. Berisi service yang akan menerima request dan menghasilkan response.
 - `src/<nama-modul>/.dto.ts`
-   a. Berisi data transfer object yang mendefinisikan struktur request ataupun response.
+  a. Berisi data transfer object yang mendefinisikan struktur request ataupun response.
 
 ## Semantic Commit Message
 
@@ -107,9 +107,35 @@ https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a
 3. Sesuaikan env dengan file .env.example
 4. Jalankan local dev derver `npm run start:dev`
 
-## Schema Validation
+## Techniques
+
+### Schema Validation
 
 Lakukan schema validation untuk **data yang masuk dari luar saat runtime (request body, params, dll)**. Tulis validasi di kelas DTO (buat kelas yang pendek boleh langsung pipe di controller). Dokumentasi:
 
 - [NestJS Validation](https://docs.nestjs.com/techniques/validation)
 - [Class Validator](https://www.npmjs.com/package/@nestjs/class-validator/v/0.13.1)
+
+> **NOTE** <br> Schema validation bersifat whitelist, artinya kalo ga kalian pasang validasinya gak bakal bisa diakses meskipun di runtime kalian tambahin.
+
+### API Documentation
+
+Dokumentasi API bisa diakses di [http://localhost:3001/api-docs](http://localhost:3001/api-docs). Yang esensial:
+| Decorator | Fungsi | Scope |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `@ApiTags("nama-controller")` | Folder/grup API | Method / Controller |
+| `@ApiOperation({ summary: "summary" })` | Description | Method |
+| `@ApiResponse({ status: XXX, description: "desc", type: Type })` | Keterangan response API | Method / Controller |
+| `@ApiBody({ type: Type })` | Enforce body secara hardcode. Kalo bisa jangan pake ini karena harusnya autogenerate dari `@Body()`. Pake ini kalo kalian pake middleware yang ngepass bodynya ke middleware bukan ke handler | Method |
+| `@ApiCookieAuth()` + `@ApiBearerAuth()` | Auth pake cookie dan bearer token | Method / Controller |
+| `@ApiProperty({ example: "example", description: "desc" })` | Register property kelas | Model |
+| `@ApiHideProperty()` | Hide property kelas | Model |
+
+Langkahnya kurang lebih:
+
+1. Di kelas yang jadi model transfer object (entity / dto), kasih decorator property
+2. Di bagian controller, kasih decorator sesuai kebutuhan auth, response, summary, dll
+
+Dokumentasi:
+
+- [NestJS OpenAPI](https://docs.nestjs.com/openapi/introduction)

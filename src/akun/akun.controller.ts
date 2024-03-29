@@ -19,7 +19,9 @@ import { RolesGuard } from "src/middlewares/roles.guard";
 import { RoleEnum } from "src/entities/pengguna.entity";
 import { Roles } from "src/middlewares/roles.decorator";
 import { JwtAuthGuard } from "src/middlewares/jwt-auth.guard";
+import { ApiTags } from "@nestjs/swagger";
 
+@ApiTags("akun")
 @Controller("akun")
 export class AkunController {
   constructor(private akunService: AkunService) {}
