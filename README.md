@@ -52,23 +52,23 @@ Folder menggunakan sistem modul NestJS yang bisa dilihat di https://docs.nestjs.
 Berikut merupakan penjelasan dasar dari setiap folder.
 
 - `src/entities`
-   a. Berisi entity typeORM sesuai ERD yang ada di https://app.eraser.io/workspace/z0dwTFLk5F4reT6CYK7E.
-   b. Atribut entity (ex: title, description) bebas ditambahkan. Jika ada atribut yang diubah
+  a. Berisi entity typeORM sesuai ERD yang ada di https://app.eraser.io/workspace/z0dwTFLk5F4reT6CYK7E.
+  b. Atribut entity (ex: title, description) bebas ditambahkan. Jika ada atribut yang diubah
   atau dihapus, infokan ke yang lain karena mungkin berpengaruh ke pengerjaan sebelumnya.
-   c. Jika ingin menambahkan tabel atau relasi, diskusikan dengan yang lain.
-   d. Jika mengubah atribut atau tabel, update ERD agar sesuai.
+  c. Jika ingin menambahkan tabel atau relasi, diskusikan dengan yang lain.
+  d. Jika mengubah atribut atau tabel, update ERD agar sesuai.
 - `src/helper`
-   a. Berisi fungsi utility atau helper.
+  a. Berisi fungsi utility atau helper.
 - `src/middlewares`
-   a. Berisi midddleware aplikasi, bisa berupa guard atau interceptor.
+  a. Berisi midddleware aplikasi, bisa berupa guard atau interceptor.
 - `src/<nama-modul>/.module.ts`
-   a. Berisi konfigurasi dasar dari sebuah modul.
+  a. Berisi konfigurasi dasar dari sebuah modul.
 - `src/<nama-modul>/.controller.ts`
-   a. Berisi controller yang akan melakukan mapping antara endpoint dengan handler-nya.
+  a. Berisi controller yang akan melakukan mapping antara endpoint dengan handler-nya.
 - `src/<nama-modul>/.service.ts`
-   a. Berisi service yang akan menerima request dan menghasilkan response.
+  a. Berisi service yang akan menerima request dan menghasilkan response.
 - `src/<nama-modul>/.dto.ts`
-   a. Berisi data transfer object yang mendefinisikan struktur request ataupun response.
+  a. Berisi data transfer object yang mendefinisikan struktur request ataupun response.
 
 ## Semantic Commit Message
 
