@@ -1,4 +1,5 @@
-import { IsEnum, IsUUID } from "@nestjs/class-validator";
+import { IsEnum, IsNotEmpty, IsUUID } from "@nestjs/class-validator";
+import { IsOptional, IsString } from "class-validator";
 import { Pengguna, RoleEnum } from "src/entities/pengguna.entity";
 
 export class FindAllResDto {
@@ -6,11 +7,29 @@ export class FindAllResDto {
   count: number;
 }
 export class CreateAkunDto {
+  @IsUUID()
+  @IsOptional()
   id?: string;
+
+  @IsString()
+  @IsNotEmpty()
   nama: string;
+
+  @IsString()
+  @IsNotEmpty()
   email: string;
+
+  @IsString()
+  @IsOptional()
   password?: string;
+
+  @IsEnum(RoleEnum, {
+    each: true,
+  })
   access: RoleEnum[];
+
+  @IsString()
+  @IsOptional()
   nim?: string;
 }
 
