@@ -7,6 +7,7 @@ import { Pengguna } from "./entities/pengguna.entity";
 import { AkunModule } from "./akun/akun.module";
 import { AuthModule } from "./auth/auth.module";
 import { TransactionModule } from "./transaction/transaction.module";
+import { validate } from "./env.validation";
 
 const defaultOptions: TypeOrmModuleOptions = {
   type: "postgres",
@@ -16,7 +17,12 @@ const defaultOptions: TypeOrmModuleOptions = {
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      validate,
+      /* WARNING: allowUnknown is set to true, but please only use 
+      environment variables defined in env.validation.ts */
+      validationOptions: { abortEarly: true, allowUnknown: true },
+    }),
     TypeOrmModule.forRoot({
       ...defaultOptions,
       host: process.env.S1_POSTGRES_HOST,
