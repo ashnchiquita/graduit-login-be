@@ -5,19 +5,26 @@ import { LocalAuthGuard } from "src/middlewares/local-auth.guard";
 import { JwtAuthGuard } from "src/middlewares/jwt-auth.guard";
 import { AkunService } from "../akun/akun.service";
 import { MicrosoftAuthGuard } from "src/middlewares/microsoft-auth.guard";
-import { AuthDto, CredentialsDto, TokenDto } from "src/auth/auth.dto";
+import {
+  AuthDto,
+  CredentialsDto,
+  LogoutDto,
+  TokenDto,
+} from "src/auth/auth.dto";
 import {
   ApiBearerAuth,
   ApiOperation,
-  ApiResponse,
   ApiTags,
   ApiCookieAuth,
   ApiBody,
   ApiExcludeEndpoint,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiFoundResponse,
 } from "@nestjs/swagger";
 import { Pengguna } from "src/entities/pengguna.entity";
 
-@ApiTags("auth")
+@ApiTags("Auth")
 @Controller("auth")
 export class AuthController {
   constructor(
@@ -36,7 +43,7 @@ export class AuthController {
       "Login with credentials. If success, cookie will be set with token value.",
   })
   @ApiBody({ type: CredentialsDto })
-  @ApiResponse({ status: 200, description: "Login success", type: TokenDto })
+  @ApiCreatedResponse({ description: "Login success", type: TokenDto })
   @UseGuards(LocalAuthGuard)
   @Post("/login/credentials")
   async loginWithCredentials(@Req() req: Request, @Res() res: Response) {
@@ -45,7 +52,7 @@ export class AuthController {
     res
       .cookie(process.env.COOKIE_NAME, accessToken, {
         ...AuthController.cookieOptions,
-        expires: new Date(Date.now() + 1 * 24 * 60 * 1000),
+        expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
       })
       .send({ token: accessToken });
   }
@@ -53,7 +60,7 @@ export class AuthController {
   @ApiOperation({
     summary: "Login with Microsoft. Redirect to Microsoft login page.",
   })
-  @ApiResponse({ status: 302, description: "Redirect to Microsoft login page" })
+  @ApiFoundResponse({ description: "Redirect to Microsoft login page" })
   @UseGuards(MicrosoftAuthGuard)
   @Get("/login/microsoft")
   loginWithMicrosoft() {}
@@ -74,7 +81,7 @@ export class AuthController {
     res
       .cookie(process.env.COOKIE_NAME, accessToken, {
         ...AuthController.cookieOptions,
-        expires: new Date(Date.now() + 1 * 24 * 60 * 1000),
+        expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
       })
       .redirect(`${process.env.LOGIN_FE_URL}`);
   }
@@ -84,10 +91,10 @@ export class AuthController {
   @ApiOperation({
     summary: "Get self account data. Can be used for authorization purposes.",
   })
-  @ApiResponse({ status: 200, description: "Authorized/valid", type: Pengguna })
+  @ApiOkResponse({ description: "Authorized/valid", type: Pengguna })
   @UseGuards(JwtAuthGuard)
   @Get("self")
-  getSelf(@Req() req: Request) {
+  getSelf(@Req() req: Request): Promise<Pengguna> {
     const { id } = req.user as AuthDto;
     return this.akunService.findById(id);
   }
@@ -97,7 +104,7 @@ export class AuthController {
   @ApiOperation({
     summary: "Logout. Clear the cookie.",
   })
-  @ApiResponse({ status: 200, description: "Logout success" })
+  @ApiCreatedResponse({ description: "Logout success", type: LogoutDto })
   @UseGuards(JwtAuthGuard)
   @Post("logout")
   logout(@Res() res: Response) {

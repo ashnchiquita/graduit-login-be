@@ -36,3 +36,8 @@ export class TokenDto {
   @IsJWT()
   token: string;
 }
+
+export class LogoutDto {
+  @ApiProperty()
+  status: string;
+}

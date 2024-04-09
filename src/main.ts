@@ -23,8 +23,8 @@ async function bootstrap() {
       "GraduIT API Documentation for account and authentication services",
     )
     .setVersion("1.0")
-    .addTag("auth")
-    .addTag("akun")
+    .addTag("Akun")
+    .addTag("Auth")
     .addBearerAuth()
     .addCookieAuth(process.env.COOKIE_NAME)
     .build();
