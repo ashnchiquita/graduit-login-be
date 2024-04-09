@@ -36,6 +36,8 @@ export class AuthController {
     httpOnly: true,
     secure: true,
     sameSite: "strict",
+    domain: process.env.COOKIE_DOMAIN,
+    path: "/",
   };
 
   @ApiOperation({
@@ -108,6 +110,8 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post("logout")
   logout(@Res() res: Response) {
-    res.clearCookie(process.env.COOKIE_NAME).send({ status: "ok" });
+    res
+      .clearCookie(process.env.COOKIE_NAME, AuthController.cookieOptions)
+      .send({ status: "ok" });
   }
 }

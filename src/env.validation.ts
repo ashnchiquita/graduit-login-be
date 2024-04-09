@@ -69,6 +69,12 @@ class EnvironmentVariables {
   @IsString()
   @IsUrl({ require_tld: false })
   LOGIN_FE_URL: string;
+
+  @IsString()
+  COOKIE_NAME: string;
+
+  @IsString()
+  COOKIE_DOMAIN: string;
 }
 
 export function validate(config: Record<string, unknown>) {
