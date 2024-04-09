@@ -12,34 +12,40 @@ import {
 import { AkunService } from "./akun.service";
 import {
   BatchUpdateRoleDto,
+  BatchUpdateRoleRespDto,
+  ByIdParamDto,
   CreateAkunDto,
+  FindAllQueryDto,
   FindAllResDto,
 } from "src/akun/akun.dto";
 import { RolesGuard } from "src/middlewares/roles.guard";
-import { RoleEnum } from "src/entities/pengguna.entity";
+import { Pengguna, RoleEnum } from "src/entities/pengguna.entity";
 import { Roles } from "src/middlewares/roles.decorator";
 import { JwtAuthGuard } from "src/middlewares/jwt-auth.guard";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiCookieAuth, ApiOkResponse, ApiTags } from "@nestjs/swagger";
 
-@ApiTags("akun")
+@ApiTags("Akun")
+@ApiCookieAuth()
 @Controller("akun")
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
 export class AkunController {
   constructor(private akunService: AkunService) {}
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN, RoleEnum.S2_TIM_TESIS)
+  @ApiOkResponse({ type: FindAllResDto })
   @Get("/")
-  findAll(
-    @Query("page") page: number = 1,
-    @Query("limit") limit: number = 10,
-    @Query("search") search: string = "",
-  ): Promise<FindAllResDto> {
-    return this.akunService.findAll(page, limit, search);
+  findAll(@Query() query: FindAllQueryDto): Promise<FindAllResDto> {
+    return this.akunService.findAll(
+      query.page || 1,
+      query.limit || 10,
+      query.search || "",
+    );
   }
 
+  @ApiOkResponse({ type: Pengguna })
   @Get("/:id")
-  findById(@Param("id") accountId) {
-    return this.akunService.findById(accountId);
+  findById(@Param() param: ByIdParamDto): Promise<Pengguna> {
+    return this.akunService.findById(param.id);
   }
 
   @Put("/")
@@ -48,16 +54,15 @@ export class AkunController {
   }
 
   @Delete("/:id")
-  deleteAccount(@Param("id") accountId) {
-    return this.akunService.deleteAccount(accountId);
+  deleteAccount(@Param() param: ByIdParamDto) {
+    return this.akunService.deleteAccount(param.id);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN, RoleEnum.S2_TIM_TESIS)
+  @ApiOkResponse({ type: BatchUpdateRoleRespDto })
   @Patch("/roles-batch")
-  batchUpdateRole(@Body() batchUpdateRoleDto: BatchUpdateRoleDto): Promise<{
-    message: string;
-  }> {
+  batchUpdateRole(
+    @Body() batchUpdateRoleDto: BatchUpdateRoleDto,
+  ): Promise<BatchUpdateRoleRespDto> {
     return this.akunService.batchUpdateRole(batchUpdateRoleDto);
   }
 }

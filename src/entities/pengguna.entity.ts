@@ -1,5 +1,9 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { ApiProperty, ApiHideProperty } from "@nestjs/swagger";
+import {
+  ApiProperty,
+  ApiHideProperty,
+  ApiPropertyOptional,
+} from "@nestjs/swagger";
 
 export enum RoleEnum {
   ADMIN = "ADMIN",
@@ -43,7 +47,7 @@ export class Pengguna {
   @Column({ type: "text", nullable: true })
   password: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: "13521999",
     description: "User's NIM",
   })
