@@ -25,14 +25,14 @@ import { JwtAuthGuard } from "src/middlewares/jwt-auth.guard";
 import { ApiCookieAuth, ApiOkResponse, ApiTags } from "@nestjs/swagger";
 
 @ApiTags("Akun")
-@ApiCookieAuth()
 @Controller("akun")
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
 export class AkunController {
   constructor(private akunService: AkunService) {}
 
+  @ApiCookieAuth()
   @ApiOkResponse({ type: FindAllResDto })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
   @Get("/")
   findAll(@Query() query: FindAllQueryDto): Promise<FindAllResDto> {
     return this.akunService.findAll(
@@ -42,23 +42,33 @@ export class AkunController {
     );
   }
 
+  @ApiCookieAuth()
   @ApiOkResponse({ type: Pengguna })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
   @Get("/:id")
   findById(@Param() param: ByIdParamDto): Promise<Pengguna> {
     return this.akunService.findById(param.id);
   }
 
+  // TODO: protect/secure this endpoint
   @Put("/")
   createOrUpdateAccount(@Body() createAkunDto: CreateAkunDto) {
     return this.akunService.createOrUpdateAccount(createAkunDto);
   }
 
+  @ApiCookieAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
   @Delete("/:id")
   deleteAccount(@Param() param: ByIdParamDto) {
     return this.akunService.deleteAccount(param.id);
   }
 
+  @ApiCookieAuth()
   @ApiOkResponse({ type: BatchUpdateRoleRespDto })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
   @Patch("/roles-batch")
   batchUpdateRole(
     @Body() batchUpdateRoleDto: BatchUpdateRoleDto,
