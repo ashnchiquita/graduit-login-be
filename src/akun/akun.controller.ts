@@ -7,22 +7,26 @@ import {
   Patch,
   Put,
   Query,
+  Req,
   UseGuards,
 } from "@nestjs/common";
 import { AkunService } from "./akun.service";
 import {
   BatchUpdateRoleDto,
   BatchUpdateRoleRespDto,
-  ByIdParamDto,
+  IdDto,
   CreateAkunDto,
   FindAllQueryDto,
   FindAllResDto,
+  PatchKontakDto,
 } from "src/akun/akun.dto";
 import { RolesGuard } from "src/middlewares/roles.guard";
 import { Pengguna, RoleEnum } from "src/entities/pengguna.entity";
 import { Roles } from "src/middlewares/roles.decorator";
 import { JwtAuthGuard } from "src/middlewares/jwt-auth.guard";
 import { ApiCookieAuth, ApiOkResponse, ApiTags } from "@nestjs/swagger";
+import { AuthDto } from "src/auth/auth.dto";
+import { Request } from "express";
 
 @ApiTags("Akun")
 @Controller("akun")
@@ -45,9 +49,15 @@ export class AkunController {
   @ApiCookieAuth()
   @ApiOkResponse({ type: Pengguna })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
+  @Roles(
+    RoleEnum.ADMIN,
+    RoleEnum.S1_TIM_TA,
+    RoleEnum.S2_TIM_TESIS,
+    RoleEnum.S1_PEMBIMBING,
+    RoleEnum.S2_PEMBIMBING,
+  )
   @Get("/:id")
-  findById(@Param() param: ByIdParamDto): Promise<Pengguna> {
+  findById(@Param() param: IdDto): Promise<Pengguna> {
     return this.akunService.findById(param.id);
   }
 
@@ -61,7 +71,7 @@ export class AkunController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
   @Delete("/:id")
-  deleteAccount(@Param() param: ByIdParamDto) {
+  deleteAccount(@Param() param: IdDto) {
     return this.akunService.deleteAccount(param.id);
   }
 
@@ -74,5 +84,15 @@ export class AkunController {
     @Body() batchUpdateRoleDto: BatchUpdateRoleDto,
   ): Promise<BatchUpdateRoleRespDto> {
     return this.akunService.batchUpdateRole(batchUpdateRoleDto);
+  }
+
+  @ApiCookieAuth()
+  @ApiOkResponse({ type: IdDto })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.S1_PEMBIMBING, RoleEnum.S2_PEMBIMBING)
+  @Patch("/kontak")
+  updateKontak(@Body() body: PatchKontakDto, @Req() req: Request) {
+    const { id } = req.user as AuthDto;
+    return this.akunService.updateKontak(id, body.kontak);
   }
 }

@@ -4,6 +4,7 @@ import {
   ApiHideProperty,
   ApiPropertyOptional,
 } from "@nestjs/swagger";
+import { IsEmail, IsNumberString, IsString, IsUUID } from "class-validator";
 
 export enum RoleEnum {
   ADMIN = "ADMIN",
@@ -26,6 +27,7 @@ export class Pengguna {
     example: "550e8400-e29b-41d4-a716-446655440000",
     description: "User ID",
   })
+  @IsUUID()
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
@@ -33,6 +35,7 @@ export class Pengguna {
     example: "Azikri Maulana",
     description: "User's name",
   })
+  @IsString()
   @Column()
   nama: string;
 
@@ -40,6 +43,7 @@ export class Pengguna {
     example: "13521999@mahasiswa.itb.ac.id",
     description: "User's email",
   })
+  @IsEmail()
   @Column({ type: "text", unique: true })
   email: string;
 
@@ -51,8 +55,9 @@ export class Pengguna {
     example: "13521999",
     description: "User's NIM",
   })
+  @IsNumberString()
   @Column({ type: "varchar", length: 8, nullable: true })
-  nim: string;
+  nim?: string;
 
   @ApiProperty({
     example: '[ "S2_MAHASISWA", "S2_TIM_TESIS" ]',
@@ -65,4 +70,9 @@ export class Pengguna {
     default: [],
   })
   roles: RoleEnum[];
+
+  @ApiPropertyOptional()
+  @IsString()
+  @Column({ type: "text", nullable: true })
+  kontak: string;
 }

@@ -3,6 +3,7 @@ import {
   BatchUpdateRoleDto,
   CreateAkunDto,
   FindAllResDto,
+  IdDto,
   UpsertExtDto,
 } from "src/akun/akun.dto";
 import { Pengguna } from "src/entities/pengguna.entity";
@@ -53,6 +54,7 @@ export class AkunService {
           email: true,
           roles: true,
           nim: true,
+          kontak: true,
         },
         where: {
           id: accountId,
@@ -151,5 +153,19 @@ export class AkunService {
     });
 
     return { message: "success" };
+  }
+
+  async updateKontak(id: string, kontak: string) {
+    return await this.transactionService.transaction(async (qr1, qr2) => {
+      const s1Repo = qr1.manager.getRepository(Pengguna);
+      const s2Repo = qr2.manager.getRepository(Pengguna);
+
+      await Promise.all([
+        s1Repo.update({ id }, { kontak }),
+        s2Repo.update({ id }, { kontak }),
+      ]);
+
+      return { id: id } as IdDto;
+    });
   }
 }
