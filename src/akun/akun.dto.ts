@@ -1,12 +1,6 @@
-import { IsEnum, IsNotEmpty, IsUUID } from "@nestjs/class-validator";
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import {
-  IsArray,
-  IsEmail,
-  IsNumberString,
-  IsOptional,
-  IsString,
-} from "class-validator";
+import { IsEnum, IsUUID } from "@nestjs/class-validator";
+import { ApiProperty, ApiPropertyOptional, PickType } from "@nestjs/swagger";
+import { IsArray, IsNumberString, IsOptional, IsString } from "class-validator";
 import { Pengguna, RoleEnum } from "src/entities/pengguna.entity";
 
 export class FindAllResDto {
@@ -16,21 +10,16 @@ export class FindAllResDto {
   @ApiProperty()
   count: number;
 }
-export class CreateAkunDto {
+
+export class CreateAkunDto extends PickType(Pengguna, [
+  "nama",
+  "email",
+  "nim",
+] as const) {
   @IsUUID()
   @IsOptional()
   @ApiPropertyOptional({ example: "550e8400-e29b-41d4-a716-446655440000" })
   id?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty()
-  nama: string;
-
-  @IsEmail()
-  @IsNotEmpty()
-  @ApiProperty({ example: "a@gmail.com" })
-  email: string;
 
   @IsString()
   @IsOptional()
@@ -43,11 +32,6 @@ export class CreateAkunDto {
   @IsArray()
   @ApiProperty({ enum: RoleEnum, isArray: true })
   access: RoleEnum[];
-
-  @IsNumberString()
-  @IsOptional()
-  @ApiPropertyOptional({ example: "13521129" })
-  nim?: string;
 }
 
 // intermediate dto
@@ -102,8 +86,10 @@ export class BatchUpdateRoleRespDto {
   message: string;
 }
 
-export class ByIdParamDto {
-  @ApiProperty({ example: "9322c384-fd8e-4a13-80cd-1cbd1ef95ba8" })
-  @IsUUID()
-  id: string;
+export class IdDto extends PickType(Pengguna, ["id"] as const) {}
+
+export class PatchKontakDto {
+  @IsString()
+  @ApiProperty()
+  kontak: string;
 }
