@@ -11,7 +11,7 @@ import { Pengguna, RoleEnum } from "src/entities/pengguna.entity";
 import * as bcrypt from "bcrypt";
 import { TransactionService } from "src/transaction/transaction.service";
 import { v4 as uuidv4 } from "uuid";
-import { Brackets } from "typeorm";
+import { Brackets, In } from "typeorm";
 
 @Injectable()
 export class AkunService {
@@ -102,7 +102,7 @@ export class AkunService {
       roles: createAkunDto.access,
     };
 
-    return await this.transactionService.transaction(async (qr1, qr2) => {
+    await this.transactionService.transaction(async (qr1, qr2) => {
       const [res1] = await Promise.all([
         qr1.manager.getRepository(Pengguna).upsert(val, ["id"]),
         qr2.manager.getRepository(Pengguna).upsert(val, ["id"]),
@@ -110,10 +110,12 @@ export class AkunService {
 
       return res1;
     });
+
+    return { id: createAkunDto.id };
   }
 
   async deleteAccount(accountId: string) {
-    return await this.transactionService.transaction(async (qr1, qr2) => {
+    await this.transactionService.transaction(async (qr1, qr2) => {
       const [res1] = await Promise.all([
         qr1.manager.getRepository(Pengguna).delete(accountId),
         qr2.manager.getRepository(Pengguna).delete(accountId),
@@ -121,6 +123,8 @@ export class AkunService {
 
       return res1;
     });
+
+    return { id: accountId };
   }
 
   async upsertExternalAccount(upsertExtDto: UpsertExtDto) {
@@ -159,13 +163,6 @@ export class AkunService {
       const s2Repo = qr2.manager.getRepository(Pengguna);
 
       for (const id of ids) {
-        await Promise.all([
-          s1Repo.update({ id }, { roles: newRoles }),
-          s2Repo.update({ id }, { roles: newRoles }),
-        ]);
-      }
-
-      for (const id of ids) {
         const currUserQuery = s2Repo.findOne({
           select: ["id", "roles"],
           where: { id },
@@ -189,23 +186,9 @@ export class AkunService {
       const s1Repo = qr1.manager.getRepository(Pengguna);
       const s2Repo = qr2.manager.getRepository(Pengguna);
 
-      s1Repo
-        .createQueryBuilder()
-        .update()
-        .set({ roles: [] })
-        .where("id IN (:...ids)", { ids });
-
       await Promise.all([
-        s1Repo
-          .createQueryBuilder()
-          .update()
-          .set({ roles: [] })
-          .where("id IN (:...ids)", { ids }),
-        s2Repo
-          .createQueryBuilder()
-          .update()
-          .set({ roles: [] })
-          .where("id IN (:...ids)", { ids }),
+        s1Repo.update({ id: In(ids) }, { roles: [] }),
+        s2Repo.update({ id: In(ids) }, { roles: [] }),
       ]);
     });
 

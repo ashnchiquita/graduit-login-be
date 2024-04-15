@@ -24,7 +24,12 @@ import { RolesGuard } from "src/middlewares/roles.guard";
 import { Pengguna, RoleEnum } from "src/entities/pengguna.entity";
 import { Roles } from "src/middlewares/roles.decorator";
 import { JwtAuthGuard } from "src/middlewares/jwt-auth.guard";
-import { ApiCookieAuth, ApiOkResponse, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiCookieAuth,
+  ApiOkResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import { AuthDto } from "src/auth/auth.dto";
 import { Request } from "express";
 
@@ -34,22 +39,34 @@ export class AkunController {
   constructor(private akunService: AkunService) {}
 
   @ApiCookieAuth()
+  @ApiBearerAuth()
   @ApiOkResponse({ type: FindAllResDto })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
   @Get("/")
   findAll(@Query() query: FindAllQueryDto): Promise<FindAllResDto> {
+    let roles: RoleEnum[] = [];
+
+    if (query.roles) {
+      if (typeof query.roles === "string") {
+        roles = [query.roles];
+      } else {
+        roles = query.roles;
+      }
+    }
+
     return this.akunService.findAll(
       query.page || 1,
       query.limit || 10,
       query.search || "",
       query.nama || "",
       query.email || "",
-      query.roles || [],
+      roles,
     );
   }
 
   @ApiCookieAuth()
+  @ApiBearerAuth()
   @ApiOkResponse({ type: Pengguna })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
@@ -65,12 +82,15 @@ export class AkunController {
   }
 
   // TODO: protect/secure this endpoint
+  @ApiOkResponse({ type: IdDto })
   @Put("/")
   createOrUpdateAccount(@Body() createAkunDto: CreateAkunDto) {
     return this.akunService.createOrUpdateAccount(createAkunDto);
   }
 
   @ApiCookieAuth()
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: IdDto })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
   @Delete("/:id")
@@ -79,6 +99,7 @@ export class AkunController {
   }
 
   @ApiCookieAuth()
+  @ApiBearerAuth()
   @ApiOkResponse({ type: IdsDto })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
@@ -88,15 +109,17 @@ export class AkunController {
   }
 
   @ApiCookieAuth()
+  @ApiBearerAuth()
   @ApiOkResponse({ type: IdsDto })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
   @Patch("/roles/batch-remove")
-  batchRemoveRole(@Body() batchAddRoleDto: BatchAddRoleDto): Promise<IdsDto> {
-    return this.akunService.batchRemoveRole(batchAddRoleDto);
+  batchRemoveRole(@Body() batchRemoveRoleDto: IdsDto): Promise<IdsDto> {
+    return this.akunService.batchRemoveRole(batchRemoveRoleDto);
   }
 
   @ApiCookieAuth()
+  @ApiBearerAuth()
   @ApiOkResponse({ type: IdDto })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.S1_PEMBIMBING, RoleEnum.S2_PEMBIMBING)

@@ -72,9 +72,12 @@ export class FindAllQueryDto {
   @IsEnum(RoleEnum, {
     each: true,
   })
-  @IsArray()
-  @ApiPropertyOptional({ enum: RoleEnum, isArray: true })
-  roles?: RoleEnum[];
+  @ApiPropertyOptional({
+    enum: RoleEnum,
+    isArray: true,
+    description: "default: [], use roles=...&roles=...&roles=...",
+  })
+  roles?: RoleEnum | RoleEnum[];
 }
 
 export class IdsDto {
