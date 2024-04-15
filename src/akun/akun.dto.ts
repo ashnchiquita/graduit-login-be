@@ -42,28 +42,6 @@ export class UpsertExtDto {
   nim: string | null;
 }
 
-export class BatchUpdateRoleDto {
-  @IsUUID("all", {
-    each: true,
-  })
-  @IsArray()
-  @ApiProperty({
-    type: [String],
-    example: [
-      "9322c384-fd8e-4a13-80cd-1cbd1ef95ba8",
-      "9422c384-fd8e-4a13-80cd-1cbd1ef95ba8",
-    ],
-  })
-  ids: string[];
-
-  @IsEnum(RoleEnum, {
-    each: true,
-  })
-  @IsArray()
-  @ApiProperty({ enum: RoleEnum, isArray: true })
-  newRoles: RoleEnum[];
-}
-
 export class FindAllQueryDto {
   @IsNumberString()
   @IsOptional()
@@ -99,9 +77,22 @@ export class FindAllQueryDto {
   roles?: RoleEnum[];
 }
 
-export class BatchUpdateRoleRespDto {
+export class IdsDto {
   @ApiProperty()
-  message: string;
+  @IsUUID("all", {
+    each: true,
+  })
+  @IsArray()
+  ids: string[];
+}
+
+export class BatchAddRoleDto extends IdsDto {
+  @IsEnum(RoleEnum, {
+    each: true,
+  })
+  @IsArray()
+  @ApiProperty({ enum: RoleEnum, isArray: true })
+  newRoles: RoleEnum[];
 }
 
 export class IdDto extends PickType(Pengguna, ["id"] as const) {}

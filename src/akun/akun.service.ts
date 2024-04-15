@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import {
-  BatchUpdateRoleDto,
+  BatchAddRoleDto,
   CreateAkunDto,
   FindAllResDto,
   IdDto,
+  IdsDto,
   UpsertExtDto,
 } from "src/akun/akun.dto";
 import { Pengguna, RoleEnum } from "src/entities/pengguna.entity";
@@ -47,7 +48,7 @@ export class AkunService {
           )
           .andWhere("pengguna.nama ILIKE :nama", { nama: `%${nama}%` })
           .andWhere("pengguna.email ILIKE :email", { email: `%${email}%` })
-          .andWhere("pengguna.roles @> :roles", { roles })
+          .andWhere("pengguna.roles @> :...roles", { roles })
           .skip((page - 1) * limit)
           .take(limit)
           .getManyAndCount();
@@ -152,9 +153,7 @@ export class AkunService {
     });
   }
 
-  async batchUpdateRole({ ids, newRoles }: BatchUpdateRoleDto): Promise<{
-    message: string;
-  }> {
+  async batchAddRole({ ids, newRoles }: BatchAddRoleDto): Promise<IdsDto> {
     await this.transactionService.transaction(async (qr1, qr2) => {
       const s1Repo = qr1.manager.getRepository(Pengguna);
       const s2Repo = qr2.manager.getRepository(Pengguna);
@@ -165,12 +164,55 @@ export class AkunService {
           s2Repo.update({ id }, { roles: newRoles }),
         ]);
       }
+
+      for (const id of ids) {
+        const currUserQuery = s2Repo.findOne({
+          select: ["id", "roles"],
+          where: { id },
+        });
+
+        const currRoles = (await currUserQuery).roles;
+        const mergedRoles = [...new Set([...currRoles, ...newRoles])];
+
+        await Promise.all([
+          s1Repo.update({ id }, { roles: mergedRoles }),
+          s2Repo.update({ id }, { roles: mergedRoles }),
+        ]);
+      }
     });
 
-    return { message: "success" };
+    return { ids };
   }
 
-  async updateKontak(id: string, kontak: string) {
+  async batchRemoveRole({ ids }: IdsDto): Promise<IdsDto> {
+    await this.transactionService.transaction(async (qr1, qr2) => {
+      const s1Repo = qr1.manager.getRepository(Pengguna);
+      const s2Repo = qr2.manager.getRepository(Pengguna);
+
+      s1Repo
+        .createQueryBuilder()
+        .update()
+        .set({ roles: [] })
+        .where("id IN (:...ids)", { ids });
+
+      await Promise.all([
+        s1Repo
+          .createQueryBuilder()
+          .update()
+          .set({ roles: [] })
+          .where("id IN (:...ids)", { ids }),
+        s2Repo
+          .createQueryBuilder()
+          .update()
+          .set({ roles: [] })
+          .where("id IN (:...ids)", { ids }),
+      ]);
+    });
+
+    return { ids };
+  }
+
+  async updateKontak(id: string, kontak: string): Promise<IdDto> {
     return await this.transactionService.transaction(async (qr1, qr2) => {
       const s1Repo = qr1.manager.getRepository(Pengguna);
       const s2Repo = qr2.manager.getRepository(Pengguna);
@@ -180,7 +222,7 @@ export class AkunService {
         s2Repo.update({ id }, { kontak }),
       ]);
 
-      return { id: id } as IdDto;
+      return { id: id };
     });
   }
 }

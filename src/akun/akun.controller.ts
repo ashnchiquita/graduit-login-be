@@ -12,8 +12,8 @@ import {
 } from "@nestjs/common";
 import { AkunService } from "./akun.service";
 import {
-  BatchUpdateRoleDto,
-  BatchUpdateRoleRespDto,
+  BatchAddRoleDto,
+  IdsDto,
   IdDto,
   CreateAkunDto,
   FindAllQueryDto,
@@ -79,14 +79,21 @@ export class AkunController {
   }
 
   @ApiCookieAuth()
-  @ApiOkResponse({ type: BatchUpdateRoleRespDto })
+  @ApiOkResponse({ type: IdsDto })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
-  @Patch("/roles-batch")
-  batchUpdateRole(
-    @Body() batchUpdateRoleDto: BatchUpdateRoleDto,
-  ): Promise<BatchUpdateRoleRespDto> {
-    return this.akunService.batchUpdateRole(batchUpdateRoleDto);
+  @Patch("/roles/batch-add")
+  batchUpdateRole(@Body() batchAddRoleDto: BatchAddRoleDto): Promise<IdsDto> {
+    return this.akunService.batchAddRole(batchAddRoleDto);
+  }
+
+  @ApiCookieAuth()
+  @ApiOkResponse({ type: IdsDto })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
+  @Patch("/roles/batch-remove")
+  batchRemoveRole(@Body() batchAddRoleDto: BatchAddRoleDto): Promise<IdsDto> {
+    return this.akunService.batchRemoveRole(batchAddRoleDto);
   }
 
   @ApiCookieAuth()
