@@ -48,7 +48,7 @@ export class AkunService {
           )
           .andWhere("pengguna.nama ILIKE :nama", { nama: `%${nama}%` })
           .andWhere("pengguna.email ILIKE :email", { email: `%${email}%` })
-          .andWhere("pengguna.roles @> :...roles", { roles })
+          .andWhere("pengguna.roles @> :roles", { roles })
           .skip((page - 1) * limit)
           .take(limit)
           .getManyAndCount();
