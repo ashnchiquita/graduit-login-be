@@ -6,10 +6,11 @@ import {
   IdDto,
   UpsertExtDto,
 } from "src/akun/akun.dto";
-import { Pengguna } from "src/entities/pengguna.entity";
+import { Pengguna, RoleEnum } from "src/entities/pengguna.entity";
 import * as bcrypt from "bcrypt";
 import { TransactionService } from "src/transaction/transaction.service";
 import { v4 as uuidv4 } from "uuid";
+import { Brackets } from "typeorm";
 
 @Injectable()
 export class AkunService {
@@ -19,6 +20,9 @@ export class AkunService {
     page: number,
     limit: number,
     search: string,
+    nama: string,
+    email: string,
+    roles: RoleEnum[],
   ): Promise<FindAllResDto> {
     const [akun, count] = await this.transactionService.transaction(
       async (qr1, qr2) => {
@@ -32,7 +36,18 @@ export class AkunService {
             "pengguna.roles",
             "pengguna.nim",
           ])
-          .where("pengguna.nama ILIKE :search", { search: `%${search}%` })
+          .where(
+            new Brackets((qb) => {
+              qb.where("pengguna.nama ILIKE :search", {
+                search: `%${search}%`,
+              }).orWhere("pengguna.email ILIKE :search", {
+                search: `%${search}%`,
+              });
+            }),
+          )
+          .andWhere("pengguna.nama ILIKE :nama", { nama: `%${nama}%` })
+          .andWhere("pengguna.email ILIKE :email", { email: `%${email}%` })
+          .andWhere("pengguna.roles @> :roles", { roles })
           .skip((page - 1) * limit)
           .take(limit)
           .getManyAndCount();

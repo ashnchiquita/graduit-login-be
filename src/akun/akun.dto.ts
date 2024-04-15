@@ -79,6 +79,24 @@ export class FindAllQueryDto {
   @IsString()
   @ApiPropertyOptional()
   search?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional()
+  nama?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional()
+  email?: string;
+
+  @IsOptional()
+  @IsEnum(RoleEnum, {
+    each: true,
+  })
+  @IsArray()
+  @ApiPropertyOptional({ enum: RoleEnum, isArray: true })
+  roles?: RoleEnum[];
 }
 
 export class BatchUpdateRoleRespDto {
