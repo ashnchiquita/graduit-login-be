@@ -4,7 +4,13 @@ import {
   ApiHideProperty,
   ApiPropertyOptional,
 } from "@nestjs/swagger";
-import { IsEmail, IsNumberString, IsString, IsUUID } from "class-validator";
+import {
+  IsEmail,
+  IsNumberString,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from "class-validator";
 
 export enum RoleEnum {
   ADMIN = "ADMIN",
@@ -55,6 +61,7 @@ export class Pengguna {
     example: "13521999",
     description: "User's NIM",
   })
+  @IsOptional()
   @IsNumberString()
   @Column({ type: "varchar", length: 8, nullable: true })
   nim?: string;

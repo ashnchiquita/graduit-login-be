@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import {
   BatchAddRoleDto,
   CreateAkunDto,
@@ -88,6 +88,22 @@ export class AkunService {
   }
 
   async createOrUpdateAccount(createAkunDto: CreateAkunDto) {
+    if (
+      (createAkunDto.access.includes(RoleEnum.S2_MAHASISWA) ||
+        createAkunDto.access.includes(RoleEnum.S1_MAHASISWA)) &&
+      !createAkunDto.nim
+    ) {
+      throw new BadRequestException("NIM is required for S2_MAHASISWA");
+    }
+
+    if (
+      !createAkunDto.access.includes(RoleEnum.S2_MAHASISWA) &&
+      !createAkunDto.access.includes(RoleEnum.S1_MAHASISWA) &&
+      createAkunDto.nim
+    ) {
+      throw new BadRequestException("NIM is not allowed for this role");
+    }
+
     const hash = createAkunDto.password
       ? await bcrypt.hash(createAkunDto.password, 10)
       : undefined;
@@ -98,7 +114,8 @@ export class AkunService {
 
     const val = {
       ...createAkunDto,
-      password: hash,
+      nim: createAkunDto.nim || null,
+      password: hash || null,
       roles: createAkunDto.access,
     };
 
