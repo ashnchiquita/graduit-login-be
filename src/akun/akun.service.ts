@@ -1,15 +1,17 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import {
-  BatchUpdateRoleDto,
+  BatchAddRoleDto,
   CreateAkunDto,
   FindAllResDto,
   IdDto,
+  IdsDto,
   UpsertExtDto,
 } from "src/akun/akun.dto";
-import { Pengguna } from "src/entities/pengguna.entity";
+import { Pengguna, RoleEnum } from "src/entities/pengguna.entity";
 import * as bcrypt from "bcrypt";
 import { TransactionService } from "src/transaction/transaction.service";
 import { v4 as uuidv4 } from "uuid";
+import { Brackets, In } from "typeorm";
 
 @Injectable()
 export class AkunService {
@@ -19,6 +21,9 @@ export class AkunService {
     page: number,
     limit: number,
     search: string,
+    nama: string,
+    email: string,
+    roles: RoleEnum[],
   ): Promise<FindAllResDto> {
     const [akun, count] = await this.transactionService.transaction(
       async (qr1, qr2) => {
@@ -32,7 +37,18 @@ export class AkunService {
             "pengguna.roles",
             "pengguna.nim",
           ])
-          .where("pengguna.nama ILIKE :search", { search: `%${search}%` })
+          .where(
+            new Brackets((qb) => {
+              qb.where("pengguna.nama ILIKE :search", {
+                search: `%${search}%`,
+              }).orWhere("pengguna.email ILIKE :search", {
+                search: `%${search}%`,
+              });
+            }),
+          )
+          .andWhere("pengguna.nama ILIKE :nama", { nama: `%${nama}%` })
+          .andWhere("pengguna.email ILIKE :email", { email: `%${email}%` })
+          .andWhere("pengguna.roles @> :roles", { roles })
           .skip((page - 1) * limit)
           .take(limit)
           .getManyAndCount();
@@ -72,6 +88,22 @@ export class AkunService {
   }
 
   async createOrUpdateAccount(createAkunDto: CreateAkunDto) {
+    if (
+      (createAkunDto.access.includes(RoleEnum.S2_MAHASISWA) ||
+        createAkunDto.access.includes(RoleEnum.S1_MAHASISWA)) &&
+      !createAkunDto.nim
+    ) {
+      throw new BadRequestException("NIM is required for S2_MAHASISWA");
+    }
+
+    if (
+      !createAkunDto.access.includes(RoleEnum.S2_MAHASISWA) &&
+      !createAkunDto.access.includes(RoleEnum.S1_MAHASISWA) &&
+      createAkunDto.nim
+    ) {
+      throw new BadRequestException("NIM is not allowed for this role");
+    }
+
     const hash = createAkunDto.password
       ? await bcrypt.hash(createAkunDto.password, 10)
       : undefined;
@@ -82,11 +114,12 @@ export class AkunService {
 
     const val = {
       ...createAkunDto,
-      password: hash,
+      nim: createAkunDto.nim || null,
+      password: hash || null,
       roles: createAkunDto.access,
     };
 
-    return await this.transactionService.transaction(async (qr1, qr2) => {
+    await this.transactionService.transaction(async (qr1, qr2) => {
       const [res1] = await Promise.all([
         qr1.manager.getRepository(Pengguna).upsert(val, ["id"]),
         qr2.manager.getRepository(Pengguna).upsert(val, ["id"]),
@@ -94,10 +127,12 @@ export class AkunService {
 
       return res1;
     });
+
+    return { id: createAkunDto.id };
   }
 
   async deleteAccount(accountId: string) {
-    return await this.transactionService.transaction(async (qr1, qr2) => {
+    await this.transactionService.transaction(async (qr1, qr2) => {
       const [res1] = await Promise.all([
         qr1.manager.getRepository(Pengguna).delete(accountId),
         qr2.manager.getRepository(Pengguna).delete(accountId),
@@ -105,6 +140,8 @@ export class AkunService {
 
       return res1;
     });
+
+    return { id: accountId };
   }
 
   async upsertExternalAccount(upsertExtDto: UpsertExtDto) {
@@ -137,25 +174,45 @@ export class AkunService {
     });
   }
 
-  async batchUpdateRole({ ids, newRoles }: BatchUpdateRoleDto): Promise<{
-    message: string;
-  }> {
+  async batchAddRole({ ids, newRoles }: BatchAddRoleDto): Promise<IdsDto> {
     await this.transactionService.transaction(async (qr1, qr2) => {
       const s1Repo = qr1.manager.getRepository(Pengguna);
       const s2Repo = qr2.manager.getRepository(Pengguna);
 
       for (const id of ids) {
+        const currUserQuery = s2Repo.findOne({
+          select: ["id", "roles"],
+          where: { id },
+        });
+
+        const currRoles = (await currUserQuery).roles;
+        const mergedRoles = [...new Set([...currRoles, ...newRoles])];
+
         await Promise.all([
-          s1Repo.update({ id }, { roles: newRoles }),
-          s2Repo.update({ id }, { roles: newRoles }),
+          s1Repo.update({ id }, { roles: mergedRoles }),
+          s2Repo.update({ id }, { roles: mergedRoles }),
         ]);
       }
     });
 
-    return { message: "success" };
+    return { ids };
   }
 
-  async updateKontak(id: string, kontak: string) {
+  async batchRemoveRole({ ids }: IdsDto): Promise<IdsDto> {
+    await this.transactionService.transaction(async (qr1, qr2) => {
+      const s1Repo = qr1.manager.getRepository(Pengguna);
+      const s2Repo = qr2.manager.getRepository(Pengguna);
+
+      await Promise.all([
+        s1Repo.update({ id: In(ids) }, { roles: [] }),
+        s2Repo.update({ id: In(ids) }, { roles: [] }),
+      ]);
+    });
+
+    return { ids };
+  }
+
+  async updateKontak(id: string, kontak: string): Promise<IdDto> {
     return await this.transactionService.transaction(async (qr1, qr2) => {
       const s1Repo = qr1.manager.getRepository(Pengguna);
       const s2Repo = qr2.manager.getRepository(Pengguna);
@@ -165,7 +222,7 @@ export class AkunService {
         s2Repo.update({ id }, { kontak }),
       ]);
 
-      return { id: id } as IdDto;
+      return { id: id };
     });
   }
 }
