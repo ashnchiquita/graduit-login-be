@@ -115,7 +115,7 @@ export class AkunService {
     const val = {
       ...createAkunDto,
       nim: createAkunDto.nim || null,
-      password: hash || null,
+      password: hash,
       roles: createAkunDto.access,
     };
 
