@@ -2,11 +2,12 @@ import { Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
+import { AkunService } from "src/akun/akun.service";
 import { AuthDto } from "src/auth/auth.dto";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private akunService: AkunService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         JwtStrategy.extractJwtFromReq,
@@ -28,7 +29,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return null;
   }
 
-  validate(payload: any): AuthDto {
+  async validate(payload: any): Promise<AuthDto | boolean> {
+    const user = await this.akunService.findById(payload.sub);
+
+    if (!user.aktif) {
+      return false;
+    }
+
     return { id: payload.sub };
   }
 }

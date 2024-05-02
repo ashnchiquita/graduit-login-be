@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import {
   BatchAddRoleDto,
   CreateAkunDto,
@@ -70,6 +74,7 @@ export class AkunService {
           email: true,
           roles: true,
           nim: true,
+          aktif: true,
           kontak: true,
         },
         where: {
@@ -220,6 +225,35 @@ export class AkunService {
       await Promise.all([
         s1Repo.update({ id }, { kontak }),
         s2Repo.update({ id }, { kontak }),
+      ]);
+
+      return { id: id };
+    });
+  }
+
+  async archiveAkun(id: string): Promise<IdDto> {
+    const user = await this.findById(id);
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    if (
+      !user.roles.includes(RoleEnum.S2_MAHASISWA) &&
+      !user.roles.includes(RoleEnum.S1_MAHASISWA)
+    ) {
+      throw new BadRequestException(
+        "Only S2_MAHASISWA and S1_MAHASISWA can be archived",
+      );
+    }
+
+    return await this.transactionService.transaction(async (qr1, qr2) => {
+      const s1Repo = qr1.manager.getRepository(Pengguna);
+      const s2Repo = qr2.manager.getRepository(Pengguna);
+
+      await Promise.all([
+        s1Repo.update({ id }, { aktif: false }),
+        s2Repo.update({ id }, { aktif: false }),
       ]);
 
       return { id: id };
