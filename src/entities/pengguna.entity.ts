@@ -5,6 +5,7 @@ import {
   ApiPropertyOptional,
 } from "@nestjs/swagger";
 import {
+  IsBoolean,
   IsEmail,
   IsNumberString,
   IsOptional,
@@ -79,4 +80,9 @@ export class Pengguna {
   @IsString()
   @Column({ type: "text", nullable: true })
   kontak: string;
+
+  @ApiPropertyOptional()
+  @IsBoolean()
+  @Column({ type: "boolean", default: true })
+  aktif: boolean;
 }

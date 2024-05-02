@@ -70,6 +70,7 @@ export class AkunService {
           email: true,
           roles: true,
           nim: true,
+          aktif: true,
           kontak: true,
         },
         where: {

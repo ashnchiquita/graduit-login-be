@@ -30,6 +30,13 @@ export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
       nama: displayName as string,
     };
 
+    const existingUser = await this.akunService.findById(user.id);
+
+    if (existingUser && !existingUser.aktif) {
+      done(null, false);
+      return;
+    }
+
     const splittedEmail = user.email.split("@")[0];
     let nim: null | string = null;
 
