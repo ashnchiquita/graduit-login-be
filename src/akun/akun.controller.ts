@@ -128,4 +128,14 @@ export class AkunController {
     const { id } = req.user as AuthDto;
     return this.akunService.updateKontak(id, body.kontak);
   }
+
+  @ApiCookieAuth()
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: IdDto })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
+  @Patch("/archive")
+  archiveAkun(@Body() body: IdDto) {
+    return this.akunService.archiveAkun(body.id);
+  }
 }
