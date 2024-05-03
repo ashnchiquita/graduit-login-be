@@ -9,6 +9,7 @@ import {
   FindAllResDto,
   IdDto,
   IdsDto,
+  PatchProfileDto,
   UpsertExtDto,
 } from "src/akun/akun.dto";
 import { Pengguna, RoleEnum } from "src/entities/pengguna.entity";
@@ -40,6 +41,12 @@ export class AkunService {
             "pengguna.email",
             "pengguna.roles",
             "pengguna.nim",
+            "pengguna.kontakWhatsApp",
+            "pengguna.kontakMsTeams",
+            "pengguna.kontakEmail",
+            "pengguna.kontakTelp",
+            "pengguna.kontakLainnya",
+            "pengguna.keahlian",
           ])
           .where(
             new Brackets((qb) => {
@@ -75,7 +82,12 @@ export class AkunService {
           roles: true,
           nim: true,
           aktif: true,
-          kontak: true,
+          kontakWhatsApp: true,
+          kontakMsTeams: true,
+          kontakEmail: true,
+          kontakTelp: true,
+          kontakLainnya: true,
+          keahlian: true,
         },
         where: {
           id: accountId,
@@ -217,14 +229,23 @@ export class AkunService {
     return { ids };
   }
 
-  async updateKontak(id: string, kontak: string): Promise<IdDto> {
+  async updateProfile(id: string, dto: PatchProfileDto): Promise<IdDto> {
+    dto = {
+      kontakWhatsApp: dto.kontakWhatsApp || null,
+      kontakMsTeams: dto.kontakMsTeams || null,
+      kontakEmail: dto.kontakEmail || null,
+      kontakTelp: dto.kontakTelp || null,
+      kontakLainnya: dto.kontakLainnya || null,
+      keahlian: dto.keahlian || null,
+    };
+
     return await this.transactionService.transaction(async (qr1, qr2) => {
       const s1Repo = qr1.manager.getRepository(Pengguna);
       const s2Repo = qr2.manager.getRepository(Pengguna);
 
       await Promise.all([
-        s1Repo.update({ id }, { kontak }),
-        s2Repo.update({ id }, { kontak }),
+        s1Repo.update({ id }, dto),
+        s2Repo.update({ id }, dto),
       ]);
 
       return { id: id };

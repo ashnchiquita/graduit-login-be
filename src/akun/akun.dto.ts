@@ -1,5 +1,10 @@
 import { IsEnum, IsUUID } from "@nestjs/class-validator";
-import { ApiProperty, ApiPropertyOptional, PickType } from "@nestjs/swagger";
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  PartialType,
+  PickType,
+} from "@nestjs/swagger";
 import { IsArray, IsNumberString, IsOptional, IsString } from "class-validator";
 import { Pengguna, RoleEnum } from "src/entities/pengguna.entity";
 
@@ -100,8 +105,13 @@ export class BatchAddRoleDto extends IdsDto {
 
 export class IdDto extends PickType(Pengguna, ["id"] as const) {}
 
-export class PatchKontakDto {
-  @IsString()
-  @ApiProperty()
-  kontak: string;
-}
+class PickedProfileDto extends PickType(Pengguna, [
+  "kontakWhatsApp",
+  "kontakMsTeams",
+  "kontakEmail",
+  "kontakTelp",
+  "kontakLainnya",
+  "keahlian",
+] as const) {}
+
+export class PatchProfileDto extends PartialType(PickedProfileDto) {}

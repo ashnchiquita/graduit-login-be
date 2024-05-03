@@ -18,7 +18,7 @@ import {
   CreateAkunDto,
   FindAllQueryDto,
   FindAllResDto,
-  PatchKontakDto,
+  PatchProfileDto,
 } from "src/akun/akun.dto";
 import { RolesGuard } from "src/middlewares/roles.guard";
 import { Pengguna, RoleEnum } from "src/entities/pengguna.entity";
@@ -28,6 +28,7 @@ import {
   ApiBearerAuth,
   ApiCookieAuth,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
 } from "@nestjs/swagger";
 import { AuthDto } from "src/auth/auth.dto";
@@ -121,12 +122,13 @@ export class AkunController {
   @ApiCookieAuth()
   @ApiBearerAuth()
   @ApiOkResponse({ type: IdDto })
+  @ApiOperation({ summary: "Any falsify value in body will set field to null" })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.S1_PEMBIMBING, RoleEnum.S2_PEMBIMBING)
-  @Patch("/kontak")
-  updateKontak(@Body() body: PatchKontakDto, @Req() req: Request) {
+  @Patch("/profile")
+  updateProfile(@Body() body: PatchProfileDto, @Req() req: Request) {
     const { id } = req.user as AuthDto;
-    return this.akunService.updateKontak(id, body.kontak);
+    return this.akunService.updateProfile(id, body);
   }
 
   @ApiCookieAuth()

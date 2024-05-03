@@ -79,9 +79,34 @@ export class Pengguna {
   @ApiPropertyOptional()
   @IsString()
   @Column({ type: "text", nullable: true })
-  kontak: string;
+  kontakWhatsApp: string;
 
   @ApiPropertyOptional()
+  @IsString()
+  @Column({ type: "text", nullable: true })
+  kontakMsTeams: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @Column({ type: "text", nullable: true })
+  kontakEmail: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @Column({ type: "text", nullable: true })
+  kontakTelp: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @Column({ type: "text", nullable: true })
+  kontakLainnya: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @Column({ type: "text", nullable: true })
+  keahlian: string;
+
+  @ApiHideProperty()
   @IsBoolean()
   @Column({ type: "boolean", default: true })
   aktif: boolean;
