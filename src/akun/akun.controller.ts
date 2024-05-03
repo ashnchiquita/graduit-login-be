@@ -28,6 +28,7 @@ import {
   ApiBearerAuth,
   ApiCookieAuth,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
 } from "@nestjs/swagger";
 import { AuthDto } from "src/auth/auth.dto";
@@ -121,6 +122,7 @@ export class AkunController {
   @ApiCookieAuth()
   @ApiBearerAuth()
   @ApiOkResponse({ type: IdDto })
+  @ApiOperation({ summary: "Any falsify value in body will set field to null" })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.S1_PEMBIMBING, RoleEnum.S2_PEMBIMBING)
   @Patch("/profile")
