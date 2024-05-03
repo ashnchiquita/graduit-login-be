@@ -18,7 +18,7 @@ import {
   CreateAkunDto,
   FindAllQueryDto,
   FindAllResDto,
-  PatchKontakDto,
+  PatchProfileDto,
 } from "src/akun/akun.dto";
 import { RolesGuard } from "src/middlewares/roles.guard";
 import { Pengguna, RoleEnum } from "src/entities/pengguna.entity";
@@ -123,10 +123,10 @@ export class AkunController {
   @ApiOkResponse({ type: IdDto })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.S1_PEMBIMBING, RoleEnum.S2_PEMBIMBING)
-  @Patch("/kontak")
-  updateKontak(@Body() body: PatchKontakDto, @Req() req: Request) {
+  @Patch("/profile")
+  updateProfile(@Body() body: PatchProfileDto, @Req() req: Request) {
     const { id } = req.user as AuthDto;
-    return this.akunService.updateKontak(id, body.kontak);
+    return this.akunService.updateProfile(id, body);
   }
 
   @ApiCookieAuth()
