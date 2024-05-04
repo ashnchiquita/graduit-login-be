@@ -63,6 +63,7 @@ export class AkunController {
       query.nama || "",
       query.email || "",
       roles,
+      query.customFlag || undefined,
     );
   }
 

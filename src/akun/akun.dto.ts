@@ -47,6 +47,11 @@ export class UpsertExtDto {
   nim: string | null;
 }
 
+export enum FindAllCustomFlag {
+  MAHASISWA = "mahasiswa",
+  NON_MAHASISWA = "non-mahasiswa",
+}
+
 export class FindAllQueryDto {
   @IsNumberString()
   @IsOptional()
@@ -83,6 +88,14 @@ export class FindAllQueryDto {
     description: "default: [], use roles=...&roles=...&roles=...",
   })
   roles?: RoleEnum | RoleEnum[];
+
+  @IsOptional()
+  @IsEnum(FindAllCustomFlag)
+  @ApiPropertyOptional({
+    enum: FindAllCustomFlag,
+    description: "undefined = all, mahasiswa, non-mahasiswa",
+  })
+  customFlag?: FindAllCustomFlag;
 }
 
 export class IdsDto {

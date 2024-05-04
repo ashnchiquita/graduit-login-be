@@ -6,6 +6,7 @@ import {
 import {
   BatchAddRoleDto,
   CreateAkunDto,
+  FindAllCustomFlag,
   FindAllResDto,
   IdDto,
   IdsDto,
@@ -29,10 +30,11 @@ export class AkunService {
     nama: string,
     email: string,
     roles: RoleEnum[],
+    customFlag?: FindAllCustomFlag,
   ): Promise<FindAllResDto> {
     const [akun, count] = await this.transactionService.transaction(
       async (qr1, qr2) => {
-        return await qr2.manager
+        const baseQuery = qr2.manager
           .getRepository(Pengguna)
           .createQueryBuilder("pengguna")
           .select([
@@ -59,10 +61,36 @@ export class AkunService {
           )
           .andWhere("pengguna.nama ILIKE :nama", { nama: `%${nama}%` })
           .andWhere("pengguna.email ILIKE :email", { email: `%${email}%` })
-          .andWhere("pengguna.roles @> :roles", { roles })
+          .andWhere("pengguna.roles @> :roles", { roles });
+
+        if (customFlag === FindAllCustomFlag.MAHASISWA) {
+          baseQuery.andWhere(
+            new Brackets((qb) => {
+              qb.where("pengguna.roles @> :rolesMhsS1", {
+                rolesMhsS1: [RoleEnum.S1_MAHASISWA],
+              }).orWhere("pengguna.roles @> :rolesMhsS2", {
+                rolesMhsS2: [RoleEnum.S2_MAHASISWA],
+              });
+            }),
+          );
+        } else if (customFlag === FindAllCustomFlag.NON_MAHASISWA) {
+          baseQuery.andWhere(
+            new Brackets((qb) => {
+              qb.where("NOT pengguna.roles @> :rolesMhsS1", {
+                rolesMhsS1: [RoleEnum.S1_MAHASISWA],
+              }).andWhere("NOT pengguna.roles @> :rolesMhsS2", {
+                rolesMhsS2: [RoleEnum.S2_MAHASISWA],
+              });
+            }),
+          );
+        }
+
+        baseQuery
           .skip((page - 1) * limit)
           .take(limit)
           .getManyAndCount();
+
+        return await baseQuery.getManyAndCount();
       },
     );
 
