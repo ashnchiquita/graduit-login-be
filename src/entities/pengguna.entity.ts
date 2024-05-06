@@ -40,7 +40,7 @@ export class Pengguna {
     description: "User's name",
   })
   @IsString()
-  @Column()
+  @Column({ type: "text", nullable: true })
   nama: string;
 
   @ApiProperty({
