@@ -8,10 +8,12 @@ import { AkunModule } from "./akun/akun.module";
 import { AuthModule } from "./auth/auth.module";
 import { TransactionModule } from "./transaction/transaction.module";
 import { validate } from "./env.validation";
+import { NotifikasiModule } from "./notifikasi/notifikasi.module";
+import { Notifikasi } from "./entities/notifikasi.entity";
 
 const defaultOptions: TypeOrmModuleOptions = {
   type: "postgres",
-  entities: [Pengguna],
+  entities: [Pengguna, Notifikasi],
   synchronize: false,
 };
 
@@ -30,7 +32,7 @@ const defaultOptions: TypeOrmModuleOptions = {
       username: process.env.S1_POSTGRES_USER,
       password: process.env.S1_POSTGRES_PASSWORD,
       database: process.env.S1_POSTGRES_DATABASE,
-      // synchronize: true,
+      synchronize: true,
       name: "S1Connection",
     }),
     TypeOrmModule.forRoot({
@@ -40,12 +42,13 @@ const defaultOptions: TypeOrmModuleOptions = {
       username: process.env.S2_POSTGRES_USER,
       password: process.env.S2_POSTGRES_PASSWORD,
       database: process.env.S2_POSTGRES_DATABASE,
-      // synchronize: true,
+      synchronize: true,
       name: "S2Connection",
     }),
     AkunModule,
     AuthModule,
     TransactionModule,
+    NotifikasiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
