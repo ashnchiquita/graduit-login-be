@@ -32,7 +32,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any): Promise<AuthDto | boolean> {
     const user = await this.akunService.findById(payload.sub);
 
-    if (!user.aktif) {
+    if (!user.aktif || user.roles.length === 0) {
       return false;
     }
 
