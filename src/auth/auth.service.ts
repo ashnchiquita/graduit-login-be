@@ -14,7 +14,7 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<AuthDto | null> {
     const user = await this.akunService.findByEmail(email);
 
-    if (user && user.aktif) {
+    if (user && user.aktif && user.roles.length > 0) {
       const match = await bcrypt.compare(password, user.password);
 
       if (match) {
