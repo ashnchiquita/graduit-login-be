@@ -21,7 +21,7 @@ const defaultOptions: TypeOrmModuleOptions = {
   imports: [
     ConfigModule.forRoot({
       validate,
-      /* WARNING: allowUnknown is set to true, but please only use 
+      /* WARNING: allowUnknown is set to true, but please only use
       environment variables defined in env.validation.ts */
       validationOptions: { abortEarly: true, allowUnknown: true },
     }),
@@ -32,7 +32,7 @@ const defaultOptions: TypeOrmModuleOptions = {
       username: process.env.S1_POSTGRES_USER,
       password: process.env.S1_POSTGRES_PASSWORD,
       database: process.env.S1_POSTGRES_DATABASE,
-      synchronize: true,
+      // synchronize: true,
       name: "S1Connection",
     }),
     TypeOrmModule.forRoot({
@@ -42,7 +42,7 @@ const defaultOptions: TypeOrmModuleOptions = {
       username: process.env.S2_POSTGRES_USER,
       password: process.env.S2_POSTGRES_PASSWORD,
       database: process.env.S2_POSTGRES_DATABASE,
-      synchronize: true,
+      // synchronize: true,
       name: "S2Connection",
     }),
     AkunModule,

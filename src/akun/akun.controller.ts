@@ -83,8 +83,11 @@ export class AkunController {
     return this.akunService.findById(param.id);
   }
 
-  // TODO: protect/secure this endpoint
+  @ApiCookieAuth()
+  @ApiBearerAuth()
   @ApiOkResponse({ type: IdDto })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN, RoleEnum.S1_TIM_TA, RoleEnum.S2_TIM_TESIS)
   @Put("/")
   createOrUpdateAccount(@Body() createAkunDto: CreateAkunDto) {
     return this.akunService.createOrUpdateAccount(createAkunDto);
